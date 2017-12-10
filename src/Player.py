@@ -10,6 +10,7 @@ class Player:
     def __init__ (self):
         self.hand = []
         self.cardCount = 0
+        self.acesInHand = 0
 
     #Starts a new hand for the Player and clears card count
     def clearHand(self):
@@ -20,7 +21,7 @@ class Player:
     #Returns either card value or 'bust' if card value is over 21
     def hit(self, deck):
         card = deck.drawCard()
-        if (isinstance(card, int)):
+        if (isinstance(card, int) or isinstance(card, str)):
             cardVal = card
         else:
             cardVal = card[0]
@@ -30,15 +31,21 @@ class Player:
         #add card value to the player's total card count
         if cardVal == 'A':
             self.cardCount += 11
+            self.acesInHand += 1
         elif cardVal == 'J' or cardVal == 'Q' or cardVal == 'K':
             self.cardCount += 10
         else:
             self.cardCount += cardVal
 
         if self.cardCount > 21:
-            return 'bust'
-        else:
-            return self.cardCount
+            while(self.cardCount > 21):
+                if (self.acesInHand > 0):
+                    self.cardCount -= 10
+                    self.acesInHand -= 1
+                else:
+                    return 'bust'
+
+        return self.cardCount
 
 
     #Defines the valid moves a player can make
