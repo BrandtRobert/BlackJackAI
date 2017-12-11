@@ -3,14 +3,17 @@
 #   Author: Courtney Schulze
 
 import copy
-from src.Deck import BlackJackDeck
+from Deck import BlackJackDeck
 
 class Player:
     #creates a new Player and gives them an empty hand
     def __init__ (self):
         self.hand = []
         self.cardCount = 0
+<<<<<<< HEAD
         self.acesInHand = 0
+=======
+>>>>>>> gamePyAttempt2
         self.bust = False
 
     #Starts a new hand for the Player and clears card count
@@ -18,28 +21,44 @@ class Player:
         self.hand = []
         self.cardCount = 0
         self.bust = False
+<<<<<<< HEAD
+=======
+    
+    def getCardCount(self):
+        count = 0
+        nonAces = [m for m in self.hand if m != 'A']
+        aces = [m for m in self.hand if m == 'A']
+        # Sum all the 'regular' cards
+        for card in nonAces:
+            if card is 'J' or card is 'Q' or card is 'K':
+                count += 10
+            else:
+                count += card
+        # If adding an ace as 11 would exceed 21, add the ace as 1 instead
+        for card in aces:
+            if count + 11 > 21:
+                count += 1
+            else:
+                count += 11
+        return count
+
+    def addCardToHand (self, card):
+        self.hand.append(card)
+        # Keep the hand in sorted order with aces at the end
+        nonAces = [m for m in self.hand if m != 'A']
+        aces = [m for m in self.hand if m == 'A']
+        self.hand = sorted(nonAces) + aces
+        # Update card count
+        self.cardCount = self.getCardCount()
+>>>>>>> gamePyAttempt2
 
     #Deals a card from the deck into the Player's hand
     #Returns either card value or 'bust' if card value is over 21
     def hit(self, deck):
         card = deck.drawCard()
-        if (isinstance(card, int) or isinstance(card, str)):
-            cardVal = card
-        else:
-            cardVal = card[0]
-
-        self.hand.append(card)
-
-        #add card value to the player's total card count
-        if cardVal == 'A':
-            self.cardCount += 11
-            self.acesInHand += 1
-        elif cardVal == 'J' or cardVal == 'Q' or cardVal == 'K':
-            self.cardCount += 10
-        else:
-            self.cardCount += cardVal
-
+        self.addCardToHand(card)
         if self.cardCount > 21:
+<<<<<<< HEAD
             while(self.cardCount > 21):
                 if (self.acesInHand > 0):
                     self.cardCount -= 10
@@ -50,14 +69,17 @@ class Player:
 
         return self.cardCount
 
+=======
+            self.bust = True
+        return self.hand
+>>>>>>> gamePyAttempt2
 
     #Defines the valid moves a player can make
     #A player can always stand, or they can hit if their card count is less than 21
     def validMoves(self):
         validMoves = ['stand']
-        if (self.cardCount < 21):
+        if (self.getCardCount() < 21):
             validMoves.append('hit')
-
         return validMoves
 
     def makeMove(self, move, currentDeck):
@@ -71,9 +93,6 @@ class Player:
 
     def getInitialHand(self):
         return self.hand[:2]
-
-    def getCardCount(self):
-        return self.cardCount
 
 if __name__ == '__main__':
     # create both deck and player
