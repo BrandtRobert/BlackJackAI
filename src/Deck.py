@@ -48,6 +48,8 @@ class BlackJackDeck:
 
     # Draws a new card from the deck
     def drawCard (self):
+        if len (self.cards) is 0:
+            self.cards = self.newShuffledDeck(True)
         return self.cards.pop()
 
     # Returnts the internal list
