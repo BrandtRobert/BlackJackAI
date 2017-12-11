@@ -10,10 +10,6 @@ class Player:
     def __init__ (self):
         self.hand = []
         self.cardCount = 0
-<<<<<<< HEAD
-        self.acesInHand = 0
-=======
->>>>>>> gamePyAttempt2
         self.bust = False
 
     #Starts a new hand for the Player and clears card count
@@ -21,8 +17,6 @@ class Player:
         self.hand = []
         self.cardCount = 0
         self.bust = False
-<<<<<<< HEAD
-=======
     
     def getCardCount(self):
         count = 0
@@ -50,7 +44,6 @@ class Player:
         self.hand = sorted(nonAces) + aces
         # Update card count
         self.cardCount = self.getCardCount()
->>>>>>> gamePyAttempt2
 
     #Deals a card from the deck into the Player's hand
     #Returns either card value or 'bust' if card value is over 21
@@ -58,21 +51,8 @@ class Player:
         card = deck.drawCard()
         self.addCardToHand(card)
         if self.cardCount > 21:
-<<<<<<< HEAD
-            while(self.cardCount > 21):
-                if (self.acesInHand > 0):
-                    self.cardCount -= 10
-                    self.acesInHand -= 1
-                else:
-                    self.bust = True
-                    return 'bust'
-
-        return self.cardCount
-
-=======
             self.bust = True
         return self.hand
->>>>>>> gamePyAttempt2
 
     #Defines the valid moves a player can make
     #A player can always stand, or they can hit if their card count is less than 21
