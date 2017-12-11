@@ -133,6 +133,7 @@ class BlackJackGame:
         self.deck = []
         numWins = 0
         numTies = 0
+        earnings = 0
 
         for n in range(numGames):
             self.player.clearHand()
@@ -146,8 +147,9 @@ class BlackJackGame:
                 self.player.makeMove(move, self.deck)
                 if self.player.bust:
                     gameOver = True
-                    if n % 100 == 0:
-                            print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand, playerWin))
+                    earnings -= 10 if move is 'double' else 5
+                    if n % 1000 == 0:
+                            print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: bust'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand))
                 # Player's turn is over
                 elif move == 'stand' or move == 'double':
                     gameOver = True
@@ -157,12 +159,15 @@ class BlackJackGame:
                     playerWin = 'push' if gameResult is 'push' else playerWin
                     if playerWin is 'win':
                         numWins += 1
-                    if playerWin is 'push':
+                        earnings += 10 if move is 'double' else 5
+                    elif playerWin is 'push':
                         numTies += 1
-                    if n % 100 == 0:
+                    else:
+                        earnings -= 10 if move is 'double' else 5
+                    if n % 1000 == 0:
                         print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand, playerWin))
         # Return the win percentage
-        return (numWins / numGames) * 100
+        return ((numWins / numGames) * 100, earnings)
 
 if __name__ == '__main__':
     game = BlackJackGame()
@@ -171,9 +176,9 @@ if __name__ == '__main__':
     Q = game.trainQ(100000, .6, .99)
     et = time.time()
     print ('Training time: {0:.2f}'.format(et - st))
-    print ('\nPlaying 1000 games with Q Table: \n')
-    winRate = game.testQ(Q, 1000)
-    print ('Win rate was: {}'.format(winRate))
-    print ('\nPlaying 1000 games with random moves: \n')
-    randWinRate = game.testQ(Q, 1000, 1)
-    print ('Win rate was: {}'.format(randWinRate))
+    print ('\nPlaying 10000 games with Q Table: \n')
+    winRate, earnings = game.testQ(Q, 10000)
+    print ('Win rate was: {}, Earnings: ${}'.format(winRate, earnings))
+    print ('\nPlaying 10000 games with random moves: \n')
+    randWinRate, earnings = game.testQ(Q, 10000, 1)
+    print ('Win rate was: {}, Earnings: ${}'.format(randWinRate, earnings))
