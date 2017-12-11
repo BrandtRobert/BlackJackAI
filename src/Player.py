@@ -3,7 +3,8 @@
 #   Author: Courtney Schulze
 
 import copy
-from src.Deck import BlackJackDeck
+# from src.Deck import BlackJackDeck
+from Deck import BlackJackDeck
 
 class Player:
     #creates a new Player and gives them an empty hand
@@ -60,10 +61,11 @@ class Player:
         validMoves = ['stand']
         if (self.getCardCount() < 21):
             validMoves.append('hit')
+            validMoves.append('double')
         return validMoves
 
     def makeMove(self, move, currentDeck):
-        if move == 'hit':
+        if move == 'hit' or move == 'double':
             return self.hit(currentDeck)
         else:
             return self.hand

@@ -1,6 +1,9 @@
-from src.Deck import BlackJackDeck
-from src.Dealer import BlackJackDealer
-from src.Player import Player
+# from src.Deck import BlackJackDeck
+# from src.Dealer import BlackJackDealer
+# from src.Player import Player
+from Deck import BlackJackDeck
+from Dealer import BlackJackDealer
+from Player import Player
 import numpy as np
 import time
 
@@ -89,7 +92,20 @@ class BlackJackGame:
                     # Player loses, negative reinforce
                     Q[currStateTup] += learningRate * (-1 - Q[currStateTup])
                     done = True
-                    
+                # Once doubling down the player's turn is over
+                elif move == 'double':
+                    done = True
+                    dealerResult = self.dealer.playTurn(self.deck, self.player)
+                    # A dealer loss is a player win
+                    if dealerResult == "loss":
+                        # Positive reinforce win * 2 for doubling winnings
+                        Q[currStateTup] = 2
+                    elif dealerResult == "push":
+                        # Neutral reinforce?
+                        Q[currStateTup] = 0
+                    else:
+                        # Player loss negative reinforce
+                        Q[currStateTup] += learningRate * (-2 - Q[currStateTup])
                 elif move == 'stand':
                     done = True
                     dealerResult = self.dealer.playTurn(self.deck, self.player)
@@ -130,8 +146,10 @@ class BlackJackGame:
                 self.player.makeMove(move, self.deck)
                 if self.player.bust:
                     gameOver = True
-                # The player is done hitting
-                elif move == 'stand':
+                    if n % 100 == 0:
+                            print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand, playerWin))
+                # Player's turn is over
+                elif move == 'stand' or move == 'double':
                     gameOver = True
                     gameResult = self.dealer.playTurn(self.deck, self.player)
                     # Print out everything thousandth game
@@ -149,7 +167,8 @@ class BlackJackGame:
 if __name__ == '__main__':
     game = BlackJackGame()
     st = time.time()
-    Q = game.trainQ(1000000, .6, .99)
+    print ('Training network...')
+    Q = game.trainQ(100000, .6, .99)
     et = time.time()
     print ('Training time: {0:.2f}'.format(et - st))
     print ('\nPlaying 1000 games with Q Table: \n')
