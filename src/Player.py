@@ -42,7 +42,7 @@ class Player:
         # Keep the hand in sorted order with aces at the end
         nonAces = [m for m in self.hand if m != 'A']
         aces = [m for m in self.hand if m == 'A']
-        self.hand = sorted(nonAces) + aces
+        # self.hand = sorted(nonAces) + aces
         # Update card count
         self.cardCount = self.getCardCount()
 
@@ -61,7 +61,8 @@ class Player:
         validMoves = ['stand']
         if (self.getCardCount() < 21):
             validMoves.append('hit')
-            validMoves.append('double')
+            if len(self.hand) == 2:
+                validMoves.append('double')
         return validMoves
 
     def makeMove(self, move, currentDeck):
