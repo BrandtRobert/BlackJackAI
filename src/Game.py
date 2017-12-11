@@ -1,9 +1,9 @@
-# from src.Deck import BlackJackDeck
-# from src.Dealer import BlackJackDealer
-# from src.Player import Player
-from Deck import BlackJackDeck
-from Dealer import BlackJackDealer
-from Player import Player
+from src.Deck import BlackJackDeck
+from src.Dealer import BlackJackDealer
+from src.Player import Player
+# from Deck import BlackJackDeck
+# from Dealer import BlackJackDealer
+# from Player import Player
 import numpy as np
 import time
 
@@ -128,7 +128,7 @@ class BlackJackGame:
                 state = newState
         return Q
     # Test's the Q function by playing a number of games and calculating the win percentage
-    def testQ (self, Q, numGames = 10000, esp = 0):
+    def testQ (self, Q, numGames = 10000, verbose = False, esp = 0):
         # Get a new deck
         self.deck = []
         numWins = 0
@@ -143,13 +143,14 @@ class BlackJackGame:
 
             while not gameOver:
                 state = self.getState()
-                move = self.epsilonGreedy(esp, Q, state) 
+                move = self.epsilonGreedy(esp, Q, state)
                 self.player.makeMove(move, self.deck)
                 if self.player.bust:
                     gameOver = True
                     earnings -= 10 if move is 'double' else 5
-                    if n % 1000 == 0:
+                    if (n % 1000 == 0) and verbose:
                             print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: bust'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand))
+
                 # Player's turn is over
                 elif move == 'stand' or move == 'double':
                     gameOver = True
@@ -162,9 +163,10 @@ class BlackJackGame:
                         earnings += 10 if move is 'double' else 5
                     elif playerWin is 'push':
                         numTies += 1
+
                     else:
                         earnings -= 10 if move is 'double' else 5
-                    if n % 1000 == 0:
+                    if (n % 1000 == 0) and verbose:
                         print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand, playerWin))
         # Return the win percentage
         return ((numWins / numGames) * 100, earnings)
@@ -182,3 +184,4 @@ if __name__ == '__main__':
     print ('\nPlaying 10000 games with random moves: \n')
     randWinRate, earnings = game.testQ(Q, 10000, 1)
     print ('Win rate was: {}, Earnings: ${}'.format(randWinRate, earnings))
+
