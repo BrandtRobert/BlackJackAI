@@ -1,6 +1,6 @@
-from Deck import BlackJackDeck
-from Dealer import BlackJackDealer
-from Player import Player
+from src.Deck import BlackJackDeck
+from src.Dealer import BlackJackDealer
+from src.Player import Player
 import numpy as np
 
 class BlackJackGame:
@@ -112,7 +112,6 @@ class BlackJackGame:
                 oldState, oldMove = state, move
                 state = newState
         return Q
-        
     # Test's the Q function by playing a number of games and calculating the win percentage
     def testQ (self, Q, numGames = 10000):
         # Get a new deck
