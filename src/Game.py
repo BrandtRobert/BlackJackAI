@@ -1,9 +1,9 @@
-# from src.Deck import BlackJackDeck
-# from src.Dealer import BlackJackDealer
-# from src.Player import Player
-from Deck import BlackJackDeck
-from Dealer import BlackJackDealer
-from Player import Player
+from src.Deck import BlackJackDeck
+from src.Dealer import BlackJackDealer
+from src.Player import Player
+# from Deck import BlackJackDeck
+# from Dealer import BlackJackDealer
+# from Player import Player
 import numpy as np
 import time
 
@@ -135,7 +135,7 @@ class BlackJackGame:
         return round(minBet ** streakFactor) if consecutiveWins > 0 else minBet
         
     # Test's the Q function by playing a number of games and calculating the win percentage
-    def testQ (self, Q, numGames = 10000, esp = 0, hotstreak = False):
+    def testQ (self, Q, numGames = 10000, verbose = False, esp = 0, hotstreak = False):
         # Get a new deck
         self.deck = []
         numWins = 0
@@ -152,7 +152,7 @@ class BlackJackGame:
             
             while not gameOver:
                 state = self.getState()
-                move = self.epsilonGreedy(esp, Q, state) 
+                move = self.epsilonGreedy(esp, Q, state)
                 self.player.makeMove(move, self.deck)
                 if self.player.bust:
                     gameOver = True
@@ -175,6 +175,7 @@ class BlackJackGame:
                     elif playerWin is 'push':
                         consecutiveWins -= 1
                         numTies += 1
+
                     else:
                         consecutiveWins = 0
                         earnings -= (2*bet) if move is 'double' else bet
