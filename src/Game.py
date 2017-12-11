@@ -2,6 +2,7 @@ from src.Deck import BlackJackDeck
 from src.Dealer import BlackJackDealer
 from src.Player import Player
 import numpy as np
+import time
 
 class BlackJackGame:
 
@@ -66,8 +67,6 @@ class BlackJackGame:
         Q = {}
 
         for nGames in range(numberGames):
-            if nGames % 10000 == 0:
-                print ("10,000 iterations complete")
             epsilon *= epsilonDecayFactor
             epsilons[nGames] = epsilon
             step = 0
@@ -113,7 +112,7 @@ class BlackJackGame:
                 state = newState
         return Q
     # Test's the Q function by playing a number of games and calculating the win percentage
-    def testQ (self, Q, numGames = 10000):
+    def testQ (self, Q, numGames = 10000, esp = 0):
         # Get a new deck
         self.deck = []
         numWins = 0
@@ -127,7 +126,7 @@ class BlackJackGame:
 
             while not gameOver:
                 state = self.getState()
-                move = self.epsilonGreedy(0, Q, state) 
+                move = self.epsilonGreedy(esp, Q, state) 
                 self.player.makeMove(move, self.deck)
                 if self.player.bust:
                     gameOver = True
@@ -149,7 +148,13 @@ class BlackJackGame:
 
 if __name__ == '__main__':
     game = BlackJackGame()
-    Q = game.trainQ(100000, .7, .99)
-    print ('calling testQ')
+    st = time.time()
+    Q = game.trainQ(1000000, .6, .99)
+    et = time.time()
+    print ('Training time: {0:.2f}'.format(et - st))
+    print ('\nPlaying 1000 games with Q Table: \n')
     winRate = game.testQ(Q, 1000)
     print ('Win rate was: {}'.format(winRate))
+    print ('\nPlaying 1000 games with random moves: \n')
+    randWinRate = game.testQ(Q, 1000, 1)
+    print ('Win rate was: {}'.format(randWinRate))
