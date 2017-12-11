@@ -3,7 +3,7 @@
 #   Author: Courtney Schulze
 
 import copy
-from Deck import BlackJackDeck
+from src.Deck import BlackJackDeck
 
 class Player:
     #creates a new Player and gives them an empty hand
@@ -17,7 +17,7 @@ class Player:
         self.hand = []
         self.cardCount = 0
         self.bust = False
-    
+
     def getCardCount(self):
         count = 0
         nonAces = [m for m in self.hand if m != 'A']
