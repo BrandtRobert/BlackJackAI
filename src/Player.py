@@ -61,7 +61,8 @@ class Player:
         validMoves = ['stand']
         if (self.getCardCount() < 21):
             validMoves.append('hit')
-            validMoves.append('double')
+            if len(hand) == 2:
+                validMoves.append('double')
         return validMoves
 
     def makeMove(self, move, currentDeck):
