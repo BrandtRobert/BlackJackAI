@@ -21,12 +21,12 @@ class BlackJackGame:
         # deal first card to each player
         # for player in self.players:
         #     player.hand.append(self.deck.drawCard())
-        self.player.hand.append(self.deck.drawCard())
+        self.player.addCardToHand(self.deck.drawCard())
         # deal first card to dealer
         self.dealer.hand.append(self.deck.drawCard())
 
         # deal second card to each player
-        self.player.hand.append(self.deck.drawCard())
+        self.player.addCardToHand(self.deck.drawCard())
          # deal second card to dealer
         dealerFaceCard = self.deck.drawCard()
         self.dealer.hand.append(dealerFaceCard)
@@ -46,6 +46,17 @@ class BlackJackGame:
     def getState(self):
         return tuple(self.player.hand + [self.dealer.faceUpCard])
 
+    # Represent Qtable index as the sum of cards in the players hand,
+    # Followed by a list of aces the players have, the dealer's up card and the move they made
+    #   Ex: state = (10, 3,'A','10', hit')
+    #       qTup returns (13, 'A', hit)
+    def getQTuple (self, state, move):
+        playerHand = state[:-1]
+        aces = [c for c in playerHand if c == 'A']
+        nonAces = [c for c in playerHand if c != 'A']
+        pHandRep = [sum(nonAces)] + aces
+        return tuple(pHandRep) + (state[-1],move)
+
     def trainQ(self, numberGames, learningRate, epsilonDecayFactor):
         epsilon = 1.0
         epsilons = np.zeros(numberGames)
@@ -64,27 +75,33 @@ class BlackJackGame:
             while not done:
                 step += 1
                 state = self.getState()
-                print (state)
                 move = self.epsilonGreedy(epsilon, Q, state)
                 playerCardCount = self.player.makeMove(move, self.deck)
                 newState = self.getState()
+                currStateTup = self.getQTuple(state, move)
+                if currStateTup not in Q:
+                    Q[currStateTup] = 0
 
-                if (tuple(state + (move, ))) not in Q:
-                    Q[tuple(state + (move, ))] = 0
-
-                if move == 'stand':
+                if self.player.bust:
+                    # Player loses, negative reinforce
+                    Q[currStateTup] += learningRate * (-1 - Q[tuple(state + (move, ))])
+                elif move == 'stand':
                     done = True
                     dealerResult = self.dealer.playTurn(self.deck, self.player)
-
-                    if dealerResult == "win":
-                        Q[tuple(state + (move, ))] = 1
+                    # A dealer loss is a player win
+                    if dealerResult == "loss":
+                        # Positive reinforce win
+                        Q[currStateTup] = 1
                     elif dealerResult == "push":
-                        Q[tuple(state + (move,))] = 0
+                        # Neutral reinforce?
+                        Q[currStateTup] = 0
                     else:
-                        Q[tuple(state + (move, ))] += learningRate * (-1 - Q[tuple(state + (move, ))])
+                        # Player loss negative reinforce
+                        Q[currStateTup] += learningRate * (-1 - Q[currStateTup])
 
                 if step > 1:
-                    Q[tuple(oldState + (oldMove, ))] += learningRate * (Q[tuple(state + (move, ))] - Q[tuple(oldState + (oldMove, ))])
+                    oldStateTup = self.getQTuple(oldState, oldMove)
+                    Q[oldStateTup] += learningRate * (Q[currStateTup] - Q[oldStateTup])
 
                 oldState, oldMove = state, move
                 state = newState
