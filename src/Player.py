@@ -11,11 +11,13 @@ class Player:
         self.hand = []
         self.cardCount = 0
         self.acesInHand = 0
+        self.bust = False
 
     #Starts a new hand for the Player and clears card count
     def clearHand(self):
         self.hand = []
         self.cardCount = 0
+        self.bust = False
 
     #Deals a card from the deck into the Player's hand
     #Returns either card value or 'bust' if card value is over 21
@@ -43,6 +45,7 @@ class Player:
                     self.cardCount -= 10
                     self.acesInHand -= 1
                 else:
+                    self.bust = True
                     return 'bust'
 
         return self.cardCount
