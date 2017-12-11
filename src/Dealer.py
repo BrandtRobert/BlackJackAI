@@ -19,7 +19,7 @@ class BlackJackDealer:
         totalCardCount = 0
 
         # calculate the running count for the cards in state
-        for card in hand:
+        for card in self.hand:
             currentCardCount = totalCardCount
             # if the card is an Ace, then check if added as 11 the total is 17 or more. Otherwise, set it equal to 1.
             if card == 'A':
@@ -32,7 +32,7 @@ class BlackJackDealer:
             self.cardCount += card
         # there is only ever one valid move for the dealer. if the card total is less than or equal to 16, the dealer hits.
         # otherwise the dealer stays.
-        if totalCardCount <= 16:
+        if self.cardCount <= 16:
             validMove = "hit"
         else:
             validMove = "stay"

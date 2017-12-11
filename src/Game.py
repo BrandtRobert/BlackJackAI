@@ -26,9 +26,11 @@ class BlackJackGame:
         self.dealer.hand.append(self.deck.drawCard())
 
         # deal second card to each player
-        fself.player.hand.append(self.deck.drawCard())
-         # deal second card to dealer
-        dealerFaceCard = self.dealer.hand.append(self.deck.drawCard())
+        self.player.hand.append(self.deck.drawCard())
+        # deal second card to dealer
+        dealerFaceCard = self.deck.drawCard()
+        self.dealer.hand.append(dealerFaceCard)
+        
         # keep track of the card that is face up on the dealer so the player knows what to base their moves off of
         self.dealer.faceUpCard = dealerFaceCard
 
@@ -85,4 +87,3 @@ class BlackJackGame:
 
                 oldState, oldMove = state, move
                 state = newState
-        
