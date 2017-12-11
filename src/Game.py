@@ -127,29 +127,40 @@ class BlackJackGame:
                 oldState, oldMove = state, move
                 state = newState
         return Q
+
+    # Implement hotstreak betting
+    def determineBet (self, consecutiveWins, minBet = 5, streakFactor = 1.2, hotstreak = True):
+        if hotstreak is False:
+            return minBet
+        return round(minBet ** streakFactor) if consecutiveWins > 0 else minBet
+        
     # Test's the Q function by playing a number of games and calculating the win percentage
-    def testQ (self, Q, numGames = 10000, esp = 0):
+    def testQ (self, Q, numGames = 10000, esp = 0, hotstreak = False):
         # Get a new deck
         self.deck = []
         numWins = 0
         numTies = 0
         earnings = 0
 
+        consecutiveWins = 0
         for n in range(numGames):
             self.player.clearHand()
             self.dealer.clearHand()
             self.deal()
             gameOver = False
-
+            bet = self.determineBet(consecutiveWins, hotstreak = hotstreak)
+            
             while not gameOver:
                 state = self.getState()
                 move = self.epsilonGreedy(esp, Q, state) 
                 self.player.makeMove(move, self.deck)
                 if self.player.bust:
                     gameOver = True
-                    earnings -= 10 if move is 'double' else 5
+                    earnings -= (2*bet) if move is 'double' else bet
+                    consecutiveWins = 0
                     if n % 1000 == 0:
-                            print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: bust'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand))
+                            resultBet = (2*bet) if move is 'double' else bet
+                            print ('Initial Hand: {}, Bet: {}, Player: {}, Dealer: {}, Result: bust'.format(self.player.getInitialHand(), resultBet, self.player.hand, self.dealer.hand))
                 # Player's turn is over
                 elif move == 'stand' or move == 'double':
                     gameOver = True
@@ -159,13 +170,17 @@ class BlackJackGame:
                     playerWin = 'push' if gameResult is 'push' else playerWin
                     if playerWin is 'win':
                         numWins += 1
-                        earnings += 10 if move is 'double' else 5
+                        consecutiveWins += 1
+                        earnings += (2*bet) if move is 'double' else bet
                     elif playerWin is 'push':
+                        consecutiveWins -= 1
                         numTies += 1
                     else:
-                        earnings -= 10 if move is 'double' else 5
+                        consecutiveWins = 0
+                        earnings -= (2*bet) if move is 'double' else bet
                     if n % 1000 == 0:
-                        print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand, playerWin))
+                        resultBet = (2*bet) if move is 'double' else bet
+                        print ('Initial Hand: {}, Bet: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), resultBet, self.player.hand, self.dealer.hand, playerWin))
         # Return the win percentage
         return ((numWins / numGames) * 100, earnings)
 
@@ -173,12 +188,14 @@ if __name__ == '__main__':
     game = BlackJackGame()
     st = time.time()
     print ('Training network...')
-    Q = game.trainQ(100000, .6, .99)
+    Q = game.trainQ(1000000, .6, .99)
     et = time.time()
     print ('Training time: {0:.2f}'.format(et - st))
     print ('\nPlaying 10000 games with Q Table: \n')
-    winRate, earnings = game.testQ(Q, 10000)
-    print ('Win rate was: {}, Earnings: ${}'.format(winRate, earnings))
+    winRate, earnings = game.testQ(Q, 10000, hotstreak = False)
+    print ('Win rate was: {}, Earnings without hotstreak: ${}\n'.format(winRate, earnings))
+    winRate, earnings = game.testQ(Q, 10000, hotstreak = True)
+    print ('\nWin rate was: {}, Earnings with hotstreak: ${}'.format(winRate, earnings))
     print ('\nPlaying 10000 games with random moves: \n')
-    randWinRate, earnings = game.testQ(Q, 10000, 1)
+    randWinRate, earnings = game.testQ(Q, 10000, 1, hotstreak = False)
     print ('Win rate was: {}, Earnings: ${}'.format(randWinRate, earnings))
