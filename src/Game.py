@@ -40,8 +40,10 @@ class BlackJackGame:
             return np.random.choice(validMoves)
         else:
             # Greedy Move
-            Qs = np.array([Q.get((tuple(state),m), 0) for m in validMoves])
-            return validMoves[ np.argmax(Qs) ]
+            Qs = np.array([Q.get(self.getQTuple(state, m), 0) for m in validMoves])
+            moves = self.player.validMoves()
+            best = moves [np.argmax(Qs)]
+            return moves [np.argmax(Qs)]
 
     def getState(self):
         return tuple(self.player.hand + [self.dealer.faceUpCard])
@@ -64,6 +66,8 @@ class BlackJackGame:
         Q = {}
 
         for nGames in range(numberGames):
+            if nGames % 10000 == 0:
+                print ("10,000 iterations complete")
             epsilon *= epsilonDecayFactor
             epsilons[nGames] = epsilon
             step = 0
@@ -84,7 +88,9 @@ class BlackJackGame:
 
                 if self.player.bust:
                     # Player loses, negative reinforce
-                    Q[currStateTup] += learningRate * (-1 - Q[tuple(state + (move, ))])
+                    Q[currStateTup] += learningRate * (-1 - Q[currStateTup])
+                    done = True
+                    
                 elif move == 'stand':
                     done = True
                     dealerResult = self.dealer.playTurn(self.deck, self.player)
@@ -105,39 +111,45 @@ class BlackJackGame:
 
                 oldState, oldMove = state, move
                 state = newState
-
+        return Q
     # Test's the Q function by playing a number of games and calculating the win percentage
-    def testQ (Q, numGames = 10000):
+    def testQ (self, Q, numGames = 10000):
         # Get a new deck
         self.deck = []
         numWins = 0
         numTies = 0
 
-        for n in numberGames:
+        for n in range(numGames):
+            self.player.clearHand()
+            self.dealer.clearHand()
             self.deal()
             gameOver = False
 
             while not gameOver:
                 state = self.getState()
-                move = epsilonGreedy(1, Q, state)
+                move = self.epsilonGreedy(0, Q, state) 
                 self.player.makeMove(move, self.deck)
-
-                # The player is done hitting
-                if move is 'stand':
-                    gameResult = self.dealer.playTurn(self.deck, self.player)
-                    if gameResult is 'win':
-                        numWins += 1
-                    if gameResult is 'push':
-                        numTies += 1
+                if self.player.bust:
                     gameOver = True
+                # The player is done hitting
+                elif move == 'stand':
+                    gameOver = True
+                    gameResult = self.dealer.playTurn(self.deck, self.player)
                     # Print out everything thousandth game
-                    if n % 1000 == 0:
-                        print ('Player: {}, Dealer: {}, Result: {}'.format(state[:-1], state[-1], gameResult))
+                    playerWin = 'win' if gameResult is 'loss' else 'loss'
+                    playerWin = 'push' if gameResult is 'push' else playerWin
+                    if playerWin is 'win':
+                        numWins += 1
+                    if playerWin is 'push':
+                        numTies += 1
+                    if n % 100 == 0:
+                        print ('Initial Hand: {}, Player: {}, Dealer: {}, Result: {}'.format(self.player.getInitialHand(), self.player.hand, self.dealer.hand, playerWin))
         # Return the win percentage
-        return (numberWins / numberGames) * 100
+        return (numWins / numGames) * 100
 
 if __name__ == '__main__':
     game = BlackJackGame()
-    game.trainQ(10000, .7, .999)
-    winRate = game.testQ()
-    print ('Win rate was: {.2f}'.format(winRate))
+    Q = game.trainQ(100000, .7, .99)
+    print ('calling testQ')
+    winRate = game.testQ(Q, 1000)
+    print ('Win rate was: {}'.format(winRate))
