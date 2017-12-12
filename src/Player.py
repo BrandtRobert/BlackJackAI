@@ -3,8 +3,8 @@
 #   Author: Courtney Schulze
 
 import copy
-# from src.Deck import BlackJackDeck
 from src.Deck import BlackJackDeck
+# from Deck import BlackJackDeck
 
 class Player:
     #creates a new Player and gives them an empty hand
